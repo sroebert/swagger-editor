@@ -12,24 +12,7 @@ if [[ "${BASE_URL}" != "/" ]]; then
 fi
 
 ## Adding env var support for swagger file (json or yaml)
-if [[ -f "$SWAGGER_FILE" ]]; then
-  cp -s "$SWAGGER_FILE" "$NGINX_ROOT"
-  REL_PATH="/$(basename $SWAGGER_FILE)"
-  sed -i "s|SwaggerEditorBundle({|SwaggerEditorBundle({\n      url: '$REL_PATH',|g" $INDEX_FILE
-
-  if [[ -z "$SWAGGER_ROOT" ]]; then
-    SWAGGER_ROOT="$(dirname $SWAGGER_FILE)"
-  fi
-
-  if [[ "$BASE_URL" != "/" ]]
-  then
-    BASE_URL=$(echo $BASE_URL | sed 's/\/$//')
-    sed -i \
-      "s|#SWAGGER_ROOT|rewrite ^$BASE_URL(/.*)$ \$1 break;\n        #SWAGGER_ROOT|" \
-      $NGINX_CONF
-  fi
-  sed -i "s|#SWAGGER_ROOT|root $SWAGGER_ROOT/;|g" $NGINX_CONF
-fi
+sed -i "s|SwaggerEditorBundle({|SwaggerEditorBundle({\n      url: '$SWAGGER_URL',|g" $INDEX_FILE
 
 # Gzip after replacements
 find /usr/share/nginx/html/ -type f -regex ".*\.\(html\|js\|css\)" -exec sh -c "gzip < {} > {}.gz" \;
